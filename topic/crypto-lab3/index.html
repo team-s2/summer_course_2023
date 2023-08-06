@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<link href="https://courses.zjusec.com/topic/crypto-lab3/" rel="canonical"/>
+<link href="../crypto-lab2/" rel="prev"/>
+<link href="../web-lab2/" rel="next"/>
+<link href="../../images/icon.png" rel="icon"/>
+<meta content="mkdocs-1.5.2, mkdocs-material-9.1.21" name="generator"/>
+<title>crypto lab 3: ECC &amp; Paillier - CTF101-Labs-2023</title>
+<link href="../../assets/stylesheets/main.eebd395e.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.ecc896b0.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CJetBrains+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Roboto";--md-code-font:"JetBrains Mono"}</style>
+<link href="../../css/heti.css" rel="stylesheet"/>
+<link href="https://cdn.tonycrane.cc/utils/katex.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:500,500i,600,600i&amp;display=fallback" rel="stylesheet"/>
+<link href="../../css/custom.css" rel="stylesheet"/>
+<script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="indigo" data-md-color-primary="indigo" data-md-color-scheme="default" dir="ltr">
+<script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#crypto-lab-3-ecc-paillier">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="CTF101-Labs-2023" class="md-header__button md-logo" data-md-component="logo" href="../.." title="CTF101-Labs-2023">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            CTF101-Labs-2023
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              crypto lab 3: ECC &amp; Paillier
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: light)" data-md-color-primary="indigo" data-md-color-scheme="default" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_2" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_2" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"></path></svg>
+</label>
+</form>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header__source">
+<a class="md-source" data-md-component="source" href="https://github.com/team-s2/summer_course_2023/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 496 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path></svg>
+</div>
+<div class="md-source__repository">
+    summer_course_2023
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<nav aria-label="Tabs" class="md-tabs" data-md-component="tabs">
+<div class="md-grid">
+<ul class="md-tabs__list">
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../..">
+      首页
+    </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../intro/tools/">
+        工具部分
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../intro/lab0/">
+        导论部分
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link md-tabs__link--active" href="../misc-lab2/">
+        专题部分
+      </a>
+</li>
+<li class="md-tabs__item">
+<a class="md-tabs__link" href="../../feedback/misc-lab1/">
+        反馈部分
+      </a>
+</li>
+</ul>
+</div>
+</nav>
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary md-nav--lifted" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="CTF101-Labs-2023" class="md-nav__button md-logo" data-md-component="logo" href="../.." title="CTF101-Labs-2023">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"></path></svg>
+</a>
+    CTF101-Labs-2023
+  </label>
+<div class="md-nav__source">
+<a class="md-source" data-md-component="source" href="https://github.com/team-s2/summer_course_2023/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 496 512" xmlns="http://www.w3.org/2000/svg"><!--! Font Awesome Free 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"></path></svg>
+</div>
+<div class="md-source__repository">
+    summer_course_2023
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../..">
+        首页
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+          工具部分
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+          工具部分
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../intro/tools/">
+        相关工具的介绍和使用
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+          导论部分
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+          导论部分
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../intro/lab0/">
+        general lab 0: 基础知识及技能
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../intro/web-lab1/">
+        web lab 1: 常见漏洞
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../intro/misc-lab1/">
+        misc lab 1: 编解码及 OSINT
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../intro/rev-lab1/">
+        rev lab 1: Baby Reverse
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../intro/pwn-lab1/">
+        pwn lab 1: Code Injection
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../intro/crypto-lab1/">
+        crypto lab 1: 逆元、RSA和离散对数
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_4" type="checkbox"/>
+<label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+          专题部分
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_4_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_4">
+<span class="md-nav__icon md-icon"></span>
+          专题部分
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../misc-lab2/">
+        misc lab 2: 图片、音频隐写
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../misc-lab3/">
+        misc lab 3: 流量、内存取证
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../rev-lab2/">
+        rev lab 2: CrackMe &amp; Malware
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../rev-lab3/">
+        rev lab 3: 迷宫问题
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../crypto-lab2/">
+        crypto lab 2: AES, RSA &amp; LWE
+      </a>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+          crypto lab 3: ECC &amp; Paillier
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+        crypto lab 3: ECC &amp; Paillier
+      </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_1">
+    什么是椭圆曲线？
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_2">
+    怎样运算椭圆曲线？
+  </a>
+<nav aria-label="怎样运算椭圆曲线？" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_3">
+    取负
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_4">
+    加法
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_5">
+    乘法
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_6">
+    除法
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_7">
+    离散对数问题
+  </a>
+<nav aria-label="离散对数问题" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hash-to-point">
+    hash-to-point
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_8">
+    双线性配对
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_9">
+    总结
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_10">
+    椭圆曲线上的公钥密码体制的应用简介
+  </a>
+<nav aria-label="椭圆曲线上的公钥密码体制的应用简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_11">
+    密钥交换
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_12">
+    公钥加密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_13">
+    数字签名
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#schnorr">
+    高级Schnorr签名简介
+  </a>
+<nav aria-label="高级Schnorr签名简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#musig">
+    多签(MuSig)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_14">
+    离散对数相等证明
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_15">
+    环签名
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_16">
+    任意群上离散对数求解简介
+  </a>
+<nav aria-label="任意群上离散对数求解简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#bsgs-algorithm">
+    BSGS algorithm
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pohlig-hellman-algorithm">
+    Pohlig-hellman algorithm（光滑曲线上的攻击）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pollards-rho-algorithm">
+    Pollard’s \(\rho\) algorithm
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pollards-kangaroolambda-algorithm">
+    Pollard’s Kangaroo(Lambda) algorithm
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_17">
+    椭圆曲线上离散对数求解简介
+  </a>
+<nav aria-label="椭圆曲线上离散对数求解简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_18">
+    奇异曲线及其攻击
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#smart-attack">
+    异常曲线攻击（SMART attack）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_19">
+    无效曲线攻击
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_20">
+    降级曲线攻击
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_21">
+    实数域曲线离散对数的计算
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mov">
+    低嵌入度数的曲线（MOV攻击）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_22">
+    双线性配对带来的其他威胁
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r">
+    数字签名中与 r 相关的攻击简介
+  </a>
+<nav aria-label="数字签名中与 r 相关的攻击简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r_1">
+    r 重用
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r_2">
+    r 线性相关
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r_3">
+    r 部分已知
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#paillier">
+    Paillier 同态加密
+  </a>
+<nav aria-label="Paillier 同态加密" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_23">
+    基础
+  </a>
+<nav aria-label="基础" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_24">
+    加法同态
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_25">
+    解决特定情形的离散对数问题
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_26">
+    扩展到合数情景
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_27">
+    交换运算次序
+  </a>
+<nav aria-label="交换运算次序" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_28">
+    密钥生成
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_29">
+    加密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_30">
+    解密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_31">
+    同态加法
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_32">
+    随机扰动
+  </a>
+<nav aria-label="随机扰动" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_33">
+    密钥生成（不变）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_34">
+    加密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_35">
+    解密（不变）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_36">
+    同态加法
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../web-lab2/">
+        web lab 2: PHP/SQL Basics
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../web-lab3/">
+        web lab 3: PHP unserialization
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../pwn-lab2/">
+        pwn lab 2: BOF and ROP
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../pwn-lab3/">
+        pwn lab 3: More ROP plz
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_5" type="checkbox"/>
+<label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          反馈部分
+          <span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_5_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_5">
+<span class="md-nav__icon md-icon"></span>
+          反馈部分
+        </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../feedback/misc-lab1/">
+        misc lab 1 批改反馈
+      </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../feedback/misc-lab23/">
+        misc lab 2/3 批改反馈
+      </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_1">
+    什么是椭圆曲线？
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_2">
+    怎样运算椭圆曲线？
+  </a>
+<nav aria-label="怎样运算椭圆曲线？" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_3">
+    取负
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_4">
+    加法
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_5">
+    乘法
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_6">
+    除法
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_7">
+    离散对数问题
+  </a>
+<nav aria-label="离散对数问题" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#hash-to-point">
+    hash-to-point
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_8">
+    双线性配对
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_9">
+    总结
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_10">
+    椭圆曲线上的公钥密码体制的应用简介
+  </a>
+<nav aria-label="椭圆曲线上的公钥密码体制的应用简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_11">
+    密钥交换
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_12">
+    公钥加密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_13">
+    数字签名
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#schnorr">
+    高级Schnorr签名简介
+  </a>
+<nav aria-label="高级Schnorr签名简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#musig">
+    多签(MuSig)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_14">
+    离散对数相等证明
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_15">
+    环签名
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_16">
+    任意群上离散对数求解简介
+  </a>
+<nav aria-label="任意群上离散对数求解简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#bsgs-algorithm">
+    BSGS algorithm
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pohlig-hellman-algorithm">
+    Pohlig-hellman algorithm（光滑曲线上的攻击）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pollards-rho-algorithm">
+    Pollard’s \(\rho\) algorithm
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#pollards-kangaroolambda-algorithm">
+    Pollard’s Kangaroo(Lambda) algorithm
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_17">
+    椭圆曲线上离散对数求解简介
+  </a>
+<nav aria-label="椭圆曲线上离散对数求解简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_18">
+    奇异曲线及其攻击
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#smart-attack">
+    异常曲线攻击（SMART attack）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_19">
+    无效曲线攻击
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_20">
+    降级曲线攻击
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_21">
+    实数域曲线离散对数的计算
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#mov">
+    低嵌入度数的曲线（MOV攻击）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_22">
+    双线性配对带来的其他威胁
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r">
+    数字签名中与 r 相关的攻击简介
+  </a>
+<nav aria-label="数字签名中与 r 相关的攻击简介" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r_1">
+    r 重用
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r_2">
+    r 线性相关
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#r_3">
+    r 部分已知
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#paillier">
+    Paillier 同态加密
+  </a>
+<nav aria-label="Paillier 同态加密" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_23">
+    基础
+  </a>
+<nav aria-label="基础" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_24">
+    加法同态
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_25">
+    解决特定情形的离散对数问题
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_26">
+    扩展到合数情景
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_27">
+    交换运算次序
+  </a>
+<nav aria-label="交换运算次序" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_28">
+    密钥生成
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_29">
+    加密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_30">
+    解密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_31">
+    同态加法
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_32">
+    随机扰动
+  </a>
+<nav aria-label="随机扰动" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_33">
+    密钥生成（不变）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_34">
+    加密
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_35">
+    解密（不变）
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#_36">
+    同态加法
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<a class="md-content__button md-icon" href="https://github.com/team-s2/summer_course_2023/tree/master/docs/topic/crypto-lab3.md" title="Edit this page">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"></path></svg>
+</a>
+<h1 id="crypto-lab-3-ecc-paillier">Crypto Lab 3: ECC &amp; Paillier<a class="headerlink" href="#crypto-lab-3-ecc-paillier" title="Permanent link">¶</a></h1>
+<p>本节<span class="heti-skip"><span class="heti-spacing"> </span>lab<span class="heti-spacing"> </span></span>题目为<span class="heti-skip"><span class="heti-spacing"> </span>CryptoHack<span class="heti-spacing"> </span></span>上的题目，总数较多，但是不要求全部完成。</p>
+<p>题目所需的思路多为上课讲过的内容。</p>
+<p>题目内容：</p>
+<ul>
+<li><a href="https://cryptohack.org/challenges/ecc/"><span>CryptoHack<span class="heti-spacing"> </span></span>上所有的椭圆曲线内容</a></li>
+<li><a href="https://cryptohack.org/challenges/maths"><span>CryptoHack<span class="heti-spacing"> </span></span>上数学部分的<span><span class="heti-spacing"> </span>Roll your Own</span></a></li>
+</ul>
+<p>所做题目要求提供思路与源码，除<span class="heti-skip"><span class="heti-spacing"> </span>BACKGROUND<span class="heti-spacing"> </span></span>和<span class="heti-skip"><span class="heti-spacing"> </span>STARTER<span class="heti-spacing"> </span></span>的部分会进行查重（这不意味这前两部分可以抄袭，亦会考虑对明显雷同者做处罚）QAQ</p>
+<p>另外请遵守<span class="heti-skip"><span class="heti-spacing"> </span>CryptoHack<span class="heti-spacing"> </span></span>的规则，即对于<span class="heti-skip"><span class="heti-spacing"> </span>Starter<span class="heti-spacing"> </span></span>分区与小于等于<span class="heti-skip"><span class="heti-spacing"> </span>10pts<span class="heti-spacing"> </span></span>的题目<strong>以外的任何题目</strong>，请<strong>不要</strong>在公网上公开分享直接的思路、脚本等内容。</p>
+<p>所得分数按在<span class="heti-skip"><span class="heti-spacing"> </span>CryptoHack<span class="heti-spacing"> </span></span>所设定的<span class="heti-skip"><span class="heti-spacing"> </span>points<span class="heti-spacing"> </span></span>和给出，会根据大家提交的作业的<span class="heti-skip"><span class="heti-spacing"> </span>points<span class="heti-spacing"> </span></span>采用合适的方式换算（当然，保证换算函数做到<span class="heti-skip"><span class="heti-spacing"> </span>pts<span class="heti-spacing"> </span></span>越高则得分越高）出最终得分。</p>
+<p>为了避免在这种设定下大家相互卷或者都跑去做<span><span class="heti-spacing"> </span>Lab 2</span>，做出以下设定：</p>
+<ul>
+<li>达到<span class="heti-skip"><span class="heti-spacing"> </span>300pts<span class="heti-spacing"> </span></span>一定是本专题<span class="heti-skip"><span class="heti-spacing"> </span>100<span class="heti-spacing"> </span></span>分（Basic Task）</li>
+<li>达到<span class="heti-skip"><span class="heti-spacing"> </span>800pts<span class="heti-spacing"> </span></span>一定是<span class="heti-skip"><span class="heti-spacing"> </span>+100<span class="heti-spacing"> </span></span>分（Bonus/Extend Task，与<span class="heti-skip"><span class="heti-spacing"> </span>Lab 2<span class="heti-spacing"> </span></span>的<span class="heti-skip"><span class="heti-spacing"> </span>Bonus<span class="heti-spacing"> </span></span>形成互相溢出的关系，<span>Lab 2<span class="heti-spacing"> </span></span>做到<span class="heti-skip"><span class="heti-spacing"> </span>200<span class="heti-spacing"> </span></span>分或本专题做到<span class="heti-skip"><span class="heti-spacing"> </span>800pts<span class="heti-spacing"> </span></span>则<span class="heti-skip"><span class="heti-spacing"> </span>Crypto<span class="heti-spacing"> </span></span>专题满分，但继续多做不再加分；如果以前对<strong><span class="heti-skip"><span class="heti-spacing"> </span>Crypto<span class="heti-spacing"> </span></span>专题</strong>的分数有其他模糊的设定，以此处设定为准）</li>
+</ul>
+<p>虽然不加分了但是还是鼓励完成更多的题目，比如<span class="heti-skip"><span class="heti-spacing"> </span>AK CryptoHack<span class="heti-spacing"> </span></span>啥的。</p>
+<p>课上讲的又快又迷糊<span><span class="heti-spacing"> </span>QAQ</span>，可以慢慢康康<span class="heti-skip"><span class="heti-spacing"> </span>CryptoHack<span class="heti-spacing"> </span></span>上的介绍题或下面的讲稿来学习相关知识：</p>
+<h2 id="_1">什么是椭圆曲线？<a class="headerlink" href="#_1" title="Permanent link">¶</a></h2>
+<p>就是满足</p>
+<div class="arithmatex">\[
+y^2=x^3+ax^2+bx+c
+\]</div>
+<p>的点 <span class="arithmatex">\((x,y)\)</span> 组成的集合，注意 <span class="arithmatex">\(x^3+ax^2+bx+c=0\)</span> 需有<span class="heti-skip"><span class="heti-spacing"> </span>3<span class="heti-spacing"> </span></span>个不同解<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（当然，椭圆曲线还有其他形式，这里是<span class="heti-skip"><span class="heti-spacing"> </span>Weierstrass<span class="heti-spacing"> </span></span>形式，相互间通过对坐标的线性变化得到同态映射）</p>
+<p>这里的加法定义在一个有加法交换群定义和乘法交换群定义的域上，常见的域有全体有理数集合组成的域，通过模一个素数意义下的运算定义出加减乘除的素数域（模数非素数时，逆元不一定找得到，其乘法也就不再是一个封闭的群）。</p>
+<p><span>Sage<span class="heti-spacing"> </span></span>上定义这样的曲线（<span class="arithmatex">\(GF(p)\)</span> 等价于模素数 <span class="arithmatex">\(p\)</span> 意义下定义出来的素数域；<span class="arithmatex">\(GF(p^e)\)</span> 可以看作每个系数均为模 <span class="arithmatex">\(p\)</span> 意义下的，且整个多项式处于模一个最高次项是 <span class="arithmatex">\(x^e\)</span> 的多项式的域）：</p>
+<div class="highlight"><pre><span></span><code><a href="#__codelineno-0-1" id="__codelineno-0-1" name="__codelineno-0-1"></a> <span class="n">sage</span><span class="p">:</span> <span class="n">E</span> <span class="o">=</span> <span class="n">EllipticCurve</span><span class="p">(</span><span class="n">GF</span><span class="p">(</span><span class="mi">10007</span><span class="p">),</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">])</span>
+<a href="#__codelineno-0-2" id="__codelineno-0-2" name="__codelineno-0-2"></a> <span class="n">Elliptic</span> <span class="n">Curve</span> <span class="n">defined</span> <span class="n">by</span> <span class="n">y</span><span class="o">^</span><span class="mi">2</span> <span class="o">=</span> <span class="n">x</span><span class="o">^</span><span class="mi">3</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">4</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">5</span> <span class="n">over</span> <span class="n">Finite</span> <span class="n">Field</span> <span class="n">of</span> <span class="n">size</span> <span class="mi">10007</span>
+</code></pre></div>
+<h2 id="_2">怎样运算椭圆曲线？<a class="headerlink" href="#_2" title="Permanent link">¶</a></h2>
+<h3 id="_3">取负<a class="headerlink" href="#_3" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>点 <span class="arithmatex">\(A=(x,y)\)</span> 则 <span class="arithmatex">\(-A=(x,-y)\)</span>。</p>
+<h3 id="_4">加法<a class="headerlink" href="#_4" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>两个椭圆曲线上的点<span class="heti-skip"><span class="heti-spacing"> </span>A,B<span class="heti-spacing"> </span></span>可以定义其加法，结果为 <span class="arithmatex">\(C=A+B\)</span>。</p>
+<p>当<span class="arithmatex">\(A\neq B\)</span><span class="heti-skip"><span class="heti-spacing"> </span>(<span class="heti-spacing"> </span></span>除<span class="arithmatex">\(B=-A\)</span>以外<span class="heti-skip"><span class="heti-spacing"> </span>)<span class="heti-spacing"> </span></span>时：</p>
+<p>易解出两点处在一直线 <span class="arithmatex">\(y=kx+b\)</span> 上，该直线与椭圆曲线的交点（联立方程得）有<span class="heti-skip"><span class="heti-spacing"> </span>3<span class="heti-spacing"> </span></span>个，其中两个是 <span class="arithmatex">\(A,B\)</span>，易用韦达定理算出另一个点 <span class="arithmatex">\(-C=(x_{-C},y_{-C})\)</span>。则 <span class="arithmatex">\(C=(x_{-C},-y_{-C})\)</span>。</p>
+<p>当 <span class="arithmatex">\(A= B\)</span> 时：</p>
+<p>曲线的点 <span class="arithmatex">\(A\)</span> 的切线的斜率 <span class="arithmatex">\(k_A\)</span>（你可以用原曲线求导得到）为</p>
+<div class="arithmatex">\[
+k=\frac{3{x_A}^2+2bx_A+d}{2y_A}
+\]</div>
+<p>易解出 <span class="arithmatex">\(A\)</span> 的切线，该切线与椭圆曲线的交点（联立方程得）有<span class="heti-skip"><span class="heti-spacing"> </span>3<span class="heti-spacing"> </span></span>个，其中两个是 <span class="arithmatex">\(A,A\)</span> 易用韦达定理算出另一个点 <span class="arithmatex">\(-C=(x_{-C},y_{-C})\)</span>。则 <span class="arithmatex">\(C=(x_{-C},-y_{-C})\)</span>。</p>
+<p>当 <span class="arithmatex">\(B=-A\)</span> 时：</p>
+<p>根据前面取负的定义，此时直线 <span class="arithmatex">\(AB\)</span> 在曲线上只找到两个解。</p>
+<p>但是没有关系，我们可以抛弃欧氏几何对于两条平行线不相交的假设，采纳非欧几何的观点，认为他们相交于无穷远点 <span class="arithmatex">\(\infin\)</span>（通常，也记为 <span class="arithmatex">\(O\)</span>）<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（想象一下，从任何一个方向远离原点走无限远的距离，都将到达 <span class="arithmatex">\(\infin\)</span>）</p>
+<p>因此 <span class="arithmatex">\(\infin=A+(-A)\)</span>。</p>
+<p>当 <span class="arithmatex">\(A,B\)</span> 中有一个是无穷远点时：</p>
+<p>将 <span class="arithmatex">\(\infin=A+(-A)\)</span> 移项，有 <span class="arithmatex">\(A+\infin=A\)</span>。</p>
+<p>可见，椭圆曲线上的加法构成一个群（原来的曲线的 <span class="arithmatex">\(x\)</span> 有<span class="heti-skip"><span class="heti-spacing"> </span>3<span class="heti-spacing"> </span></span>次保证有第<span class="heti-skip"><span class="heti-spacing"> </span>3<span class="heti-spacing"> </span></span>个解，而非欧几何的 <span class="arithmatex">\(\infin\)</span> 保证有单位元，<span class="arithmatex">\(y^2\)</span> 保证有逆元（<span class="arithmatex">\(-A\)</span>））。</p>
+<p>我们需要的是一个大素数阶的循环群，因此选取一点作为生成元（被叫做基点 <span class="arithmatex">\(G\)</span>），接下来讨论的都将是这个生成子群上的元素<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（事实上，椭圆曲线群必然与循环群或者两个循环群的直和同构，且一般用于密码学的椭圆曲线是第一种情况）</p>
+<h3 id="_5">乘法<a class="headerlink" href="#_5" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>我们将 <span class="arithmatex">\(k\)</span> 个点 <span class="arithmatex">\(A\)</span> 相加的和记作 <span class="arithmatex">\(kA\)</span>，可见，如果我们把椭圆曲线的加法叫“乘法”，那么所谓的 <span class="arithmatex">\(kA\)</span> 就是 <span class="arithmatex">\(A^k\)</span>。</p>
+<p>可以用反复平方法（快速幂）来算乘法。</p>
+<h3 id="_6">除法<a class="headerlink" href="#_6" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>存在计算椭圆曲线上解的个数 <span class="arithmatex">\(|E|\)</span>  的算法，而曲线上的点生成的循环群的阶 <span class="arithmatex">\(n\)</span> 必然是其因子（记余因子为 <span class="arithmatex">\(h=\frac{|E|}{n}\)</span>），因此如果能将 <span class="arithmatex">\(|E|\)</span> 因式分解，那么曲线的阶自然也就知晓了。<span>(Sage<span class="heti-spacing"> </span></span>上直接执行 <code>E.order()</code> 即可求得曲线上点的数量<span><span class="heti-spacing"> </span>)</span></p>
+<p>当阶是一个大素数 <span class="arithmatex">\(n\)</span> 时，由于 <span class="arithmatex">\((kn+x)G=k\infin+xG=xG,\forall k,x\in \mathbb{Z}\)</span>，所以如果这个乘数在模 <span class="arithmatex">\(n\)</span> 意义下是相同值，则乘法的结果就相同，因此，可以认为乘数在 <span class="arithmatex">\(GF(n)\)</span> 上，进而定义除法 <span class="arithmatex">\(\frac{G}{x} = (x^{-1})G\)</span>，其中 <span class="arithmatex">\(x^{-1}\)</span> 为 <span class="arithmatex">\(x\)</span> 在 <span class="arithmatex">\(GF(n)\)</span> 上的乘法逆元。</p>
+<h2 id="_7">离散对数问题<a class="headerlink" href="#_7" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h2>
+<p>即已知 <span class="arithmatex">\(A,kA\)</span> 求 <span class="arithmatex">\(k\)</span>。</p>
+<p>当阶为 <span class="arithmatex">\(n\)</span> 的群是一个循环群时，它与模 <span class="arithmatex">\(n\)</span> 意义下的整数加法群同构。而求这个加法群的离散对数是非常容易的，当 <span class="arithmatex">\(ka\equiv w\pmod n\)</span> 时，显然有其”离散对数“ <span class="arithmatex">\(k\equiv wa^{-1}\pmod n\)</span> 。因此，椭圆曲线加法群上的点本质上对应着模意义下整数加法群上的一个数字，而两者本身的加法都是易求的，困难的是求得这个对应关系（也就是同构映射）。</p>
+<p>PS：因此，当对椭圆曲线的理解有困难时，完全可以类比模<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>意义下的整数加法群（只是你不知道每个点具体代表的哪个数字）。</p>
+<h3 id="hash-to-point">hash-to-point<a class="headerlink" href="#hash-to-point" title="Permanent link">¶</a></h3>
+<p>输入一串内容，可以返回一个椭圆曲线上的点的哈希函数<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（这个密码学原语的关键在于返回的点对于基点或者其他它所返回的点的离散对数是难以计算的，因此不能用一个<span class="heti-skip"><span class="heti-spacing"> </span>hash-to-scalar<span class="heti-spacing"> </span></span>的算法算出一个<span><span class="heti-spacing"> </span>k</span>，然后返回 <span class="arithmatex">\(kG\)</span>  了事）</p>
+<p>参考例题<heti-adjacent class="heti-adjacent-quarter">：</heti-adjacent>”<span>hash-to-point"<span class="heti-spacing"> </span></span>原语误用<span><span class="heti-spacing"> </span>PlaidCTF2022 - pressure</span></p>
+<h3 id="_8">双线性配对<a class="headerlink" href="#_8" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>当曲线定义在 <span class="arithmatex">\(GF(p)\)</span> 上、曲线群的阶为<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>时，我们定义曲线的嵌入度数为满足 <span class="arithmatex">\(p^k\equiv 1\pmod n\)</span> 的最小正整数<span><span class="heti-spacing"> </span>k</span><heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（如果模<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>意义下的整数乘法是个群，那么<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>就是由<span class="heti-skip"><span class="heti-spacing"> </span>p<span class="heti-spacing"> </span></span>生成的子群大小）</p>
+<p>可见，这玩意一般是很大的，当其非常小时，如下一个双线性配对是容易计算的：</p>
+<p><span>e(A,B)=C<span class="heti-spacing"> </span></span>其中<span class="heti-skip"><span class="heti-spacing"> </span>A<span class="heti-spacing"> </span></span>是<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>上定义的椭圆曲线上的点，<span>B<span class="heti-spacing"> </span></span>是 <span class="arithmatex">\(GF(p^k)\)</span> 上定义的椭圆曲线上的点，<span>C<span class="heti-spacing"> </span></span>是 <span class="arithmatex">\(GF(p^k)\)</span> 上的值。</p>
+<p>它满足双线性，即 <span class="arithmatex">\(e(xA,yB)=e(A,B)^{xy},e(A+B,C)=e(A,C)e(B,C),e(A,B+C)=e(A,B)e(A,C)\)</span>。</p>
+<p>PS：<span>BLS<span class="heti-spacing"> </span></span>短签名算法，<span>SM9<span class="heti-spacing"> </span></span>标识密码算法等算法依赖它，此外，它也使得在一些情况下的椭圆曲线易受攻击。</p>
+<p>具体的双线性映射实现可以参考<a href="https://crypto.stanford.edu/pbc/notes/elliptic/weil.html"><span><span class="heti-spacing"> </span>https://crypto.stanford.edu/pbc/notes/elliptic/weil.html</span></a>。</p>
+<h3 id="_9">总结<a class="headerlink" href="#_9" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>上面的内容的具体细节并不重要，重要的是我们得到了一个循环群，这个群上的运算是容易的，但是离散对数问题是困难的。</p>
+<p>此外，我们还有有趣的双线性配对可以做<span><span class="heti-spacing"> </span>:)</span></p>
+<h2 id="_10">椭圆曲线上的公钥密码体制的应用简介<a class="headerlink" href="#_10" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h2>
+<p>由于离散对数是困难的，我们定义私钥<span><span class="heti-spacing"> </span>x</span>，公钥<span><span class="heti-spacing"> </span>xG</span>。</p>
+<h3 id="_11">密钥交换<a class="headerlink" href="#_11" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p><span>Diffle-Hellman<span class="heti-spacing"> </span></span>很容易从<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>的乘法群上移到曲线群上，即<span class="heti-skip"><span class="heti-spacing"> </span>Alice<span class="heti-spacing"> </span></span>随机选择 <span class="arithmatex">\(x_A\)</span>，发送 <span class="arithmatex">\(x_AG\)</span>，<span>Bob<span class="heti-spacing"> </span></span>选择 <span class="arithmatex">\(x_B\)</span>，发送 <span class="arithmatex">\(x_BG\)</span>。</p>
+<p>而 <span class="arithmatex">\(s=x_A(x_BG)=x_B(x_AG)=s'\)</span> 作为交换到的秘密。</p>
+<h3 id="_12">公钥加密<a class="headerlink" href="#_12" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>通过密钥交换，容易定义此节。</p>
+<blockquote>
+<p>可以注意到，双方密钥交换能够实现公钥加密算法，即加密者首先随机生成一个私钥<span class="heti-skip"><span class="heti-spacing"> </span>p'<span class="heti-spacing"> </span></span>并算出公钥<span><span class="heti-spacing"> </span>P'</span>，算出<span class="heti-skip"><span class="heti-spacing"> </span>s=KeyExchange(P,p')<span class="heti-spacing"> </span></span>作为对称密钥来加密<span class="heti-skip"><span class="heti-spacing"> </span>m<span class="heti-spacing"> </span></span>得到<span><span class="heti-spacing"> </span>c'</span>，令<span><span class="heti-spacing"> </span>c=(c',P')</span>；私钥持有者算出<span class="heti-skip"><span class="heti-spacing"> </span>s=KeyExchange(P',p)<span class="heti-spacing"> </span></span>并以此来解密<span class="heti-skip"><span class="heti-spacing"> </span>c'<span class="heti-spacing"> </span></span>得到<span><span class="heti-spacing"> </span>m</span>。椭圆曲线上的公钥加密算法就是这样实现的。
+</p>
+</blockquote>
+<h3 id="_13">数字签名<a class="headerlink" href="#_13" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>以下介绍最简单的<span class="heti-skip"><span class="heti-spacing"> </span>Schnorr<span class="heti-spacing"> </span></span>签名（相比依赖的假设更多、更复杂的<span class="heti-skip"><span class="heti-spacing"> </span>ECDSA, SM2<span class="heti-spacing"> </span></span>等算法而言）：</p>
+<p>数字签名的本质是：</p>
+<blockquote>
+<p>签名者要向验证者展示一项自己拥有<span><span class="heti-spacing"> </span>p</span> （“超能力”）才能做到的事情，同时，这个“展示”和<span class="heti-skip"><span class="heti-spacing"> </span>m<span class="heti-spacing"> </span></span>强相关。
+</p>
+</blockquote>
+<p>而签名者拥有的所谓“超能力”自然是能求解 <span class="arithmatex">\(xG\)</span> 的离散对数了，但是，毫无疑问，这会向验证者暴露 <span class="arithmatex">\(x\)</span>，接下来验证者就可以变成私钥持有者了。</p>
+<p>这时我们注意到，如果对 <span class="arithmatex">\(xG\)</span> 做线性变换，那么它的离散对数签名者仍然能知道。例如：给出 <span class="arithmatex">\(c,r\)</span>，那么 <span class="arithmatex">\(cxG+rG\)</span> 的离散对数就是 <span class="arithmatex">\(cx+r\)</span>。注意到 <span class="arithmatex">\(cxG,xG+rG,cxG+rG\)</span> 中如果 <span class="arithmatex">\(c,r\)</span> 随机，那么三者等概率的取到椭圆曲线群上的任意一点。那么对于任意一点的离散对数，自然没有问题？</p>
+<p>但是如果验证者知道 <span class="arithmatex">\(r,c\)</span>，那么它照样可以求出 <span class="arithmatex">\(x\)</span>，为此我们需要确保验证者只知道 <span class="arithmatex">\(rG\)</span>，而不知道 <span class="arithmatex">\(r\)</span>。</p>
+<p>由于签名者必须知道 <span class="arithmatex">\(r\)</span>，那么过程可以是签名者随机选取 <span class="arithmatex">\(r\)</span>，发送 <span class="arithmatex">\(rG\)</span> 给对方。</p>
+<p>那么 <span class="arithmatex">\(c\)</span> 呢？如果是签名者提供的，显然它可以随机选取 <span class="arithmatex">\(k\)</span>，然后令所谓的 <span class="arithmatex">\(rG=kG-cxG\)</span>，虽然签名者并不知道 <span class="arithmatex">\(x,r\)</span> ，但显然签名者能回答 <span class="arithmatex">\(cxG+rG\)</span> 的离散对数 <span class="arithmatex">\(k\)</span>。因此 <span class="arithmatex">\(c\)</span> 必须在给出 <span class="arithmatex">\(rG\)</span> 后由验证者生成。</p>
+<p>整理一下：</p>
+<ol>
+<li>签名者告知本次签名的相关对象为 <span class="arithmatex">\(m\)</span>；</li>
+<li>签名者随机生成 <span class="arithmatex">\(r\)</span> 发送 <span class="arithmatex">\(rG\)</span>；</li>
+<li>验证者随机生成 <span class="arithmatex">\(c\)</span>；</li>
+<li>签名者计算 <span class="arithmatex">\(s=r+cx\)</span> 发送 <span class="arithmatex">\(s\)</span><heti-adjacent class="heti-adjacent-half">；</heti-adjacent>（有些地方最后两步是减法，不影响正确性）</li>
+<li>验证者验证 <span class="arithmatex">\(sG=rG+cxG\)</span>。</li>
+</ol>
+<p>除了第<span class="heti-skip"><span class="heti-spacing"> </span>5<span class="heti-spacing"> </span></span>步以外，前面的步骤也要验证者参与，这意味着签名者必须在每次签名时都在线能够回答问题？</p>
+<p>因此，需要将交互式的证明过程变换成非交互的，这个过程被称作<span class="heti-skip"><span class="heti-spacing"> </span>Fiat-shamir<span class="heti-spacing"> </span></span>变换：</p>
+<p>即，将验证者随机生成的内容，替换为此前验证者收到的内容输入密码学安全哈希函数（比如<span><span class="heti-spacing"> </span>SHA256</span>，下文简记做 <span class="arithmatex">\(H\)</span>）后的输出。</p>
+<p>也就是说，签名改为：</p>
+<ol>
+<li>签名者随机生成 <span class="arithmatex">\(r\)</span>；</li>
+<li>签名者计算 <span class="arithmatex">\(c=H(rG,m,xG)\)</span>；</li>
+<li>签名者计算 <span class="arithmatex">\(s=r+cx\)</span> 发送 <span class="arithmatex">\((rG,s)\)</span><heti-adjacent class="heti-adjacent-half">；</heti-adjacent>（有些地方发送的是 <span class="arithmatex">\((s,c)\)</span>，不影响正确性）</li>
+<li>验证者验证 <span class="arithmatex">\(sG=rG+H(rG,m,xG)xG\)</span>。</li>
+</ol>
+<p>这样前<span class="heti-skip"><span class="heti-spacing"> </span>3<span class="heti-spacing"> </span></span>步就是标准的签名步骤，最后一步就是标准的验证步骤了。</p>
+<h3 id="schnorr">高级<span class="heti-skip"><span class="heti-spacing"> </span>Schnorr<span class="heti-spacing"> </span></span>签名简介<a class="headerlink" href="#schnorr" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<h4 id="musig">多签<span><span class="heti-spacing"> </span>(MuSig)</span><a class="headerlink" href="#musig" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>多签，即多个人（一个组）共同对一个消息表示认可。</p>
+<p>最朴素的多签方法是，每个人各自签一个名，这样签名的大小就会变得较大。</p>
+<p>一种想法是，签名时实际上对聚合公钥 <span class="arithmatex">\(X=\sum x_iG\)</span>，作签名。但是，如果其中第<span class="heti-skip"><span class="heti-spacing"> </span>j<span class="heti-spacing"> </span></span>个人随机生成<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>并声称它的公钥是 <span class="arithmatex">\(x_jG=kG-\sum_{i\neq j} x_iG\)</span>。他就可以自己拿着<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>对替代整个组来签名（这称作密钥取消攻击）。</p>
+<p>一种解决方法是 <span class="arithmatex">\(X=\sum H(x_1G,\ldots,x_nG,x_iG)x_iG\)</span> 采用类似<span class="heti-skip"><span class="heti-spacing"> </span>Fiat-shamir<span class="heti-spacing"> </span></span>变换的思想，想要密钥取消攻击，必须先得知由 <span class="arithmatex">\(H(\ldots)\)</span> 确定的系数，而想要算出这些系数，必须先得出 <span class="arithmatex">\(x_jG\)</span>。</p>
+<p>同时，多签的过程中要求任何人串通都不能得到余下人的密钥，因此，计算<span class="heti-skip"><span class="heti-spacing"> </span>s<span class="heti-spacing"> </span></span>不能是共享一个 <span class="arithmatex">\(r\)</span>，大家给出自己的 <span class="arithmatex">\(cx_i\)</span>。而是每人生成 <span class="arithmatex">\(r_iG\)</span> 并共享，然后大家算出  <span class="arithmatex">\(rG=\sum r_iG\)</span>，据此求出<span><span class="heti-spacing"> </span>c</span>，然后每个人求出 <span class="arithmatex">\(s_i=r_i+cx_i\)</span>，求出签名中的 <span class="arithmatex">\(s=\sum s_i\)</span>。</p>
+<p>同理，大家对 <span class="arithmatex">\(r_iG\)</span> 也有可能采取密钥取消攻击，为此，大家首先分享 <span class="arithmatex">\(H(r_iG)\)</span>，全数摘要收到后再分享 <span class="arithmatex">\(r_iG\)</span> 的同时验证摘要是否正确。</p>
+<h4 id="_14">离散对数相等证明<a class="headerlink" href="#_14" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>考虑对于群上两个基点 <span class="arithmatex">\(G,H\)</span> 要证明 <span class="arithmatex">\(C=xG,D=xH\)</span> 的同时不泄露 <span class="arithmatex">\(x\)</span>，也可用<span class="heti-skip"><span class="heti-spacing"> </span>Schnorr<span class="heti-spacing"> </span></span>签名进行。</p>
+<p>其步骤如下：</p>
+<ol>
+<li>签名者随机生成 <span class="arithmatex">\(r\)</span>；</li>
+<li>签名者计算 <span class="arithmatex">\(c=H(rG,rH,G,H,C,D)\)</span>；</li>
+<li>签名者计算 <span class="arithmatex">\(s=r+cx\)</span> 发送 <span class="arithmatex">\((rG,rH,s)\)</span>；</li>
+<li>验证者验证 <span class="arithmatex">\(c=H(rG,rH,G,H,C,D),sG=rG+cC,sH=rH+cD\)</span>。</li>
+</ol>
+<p>这里，签名者同样被要求解答线性变换后的离散对数问题，且要求变换后离散对数相等。</p>
+<p>这里 <span class="arithmatex">\(s,c\)</span> 均共用，因此唯一的作弊机会来到了伪造 <span class="arithmatex">\(r'H(r'\neq r)\)</span> 并声称 <span class="arithmatex">\(r'H\)</span> 是 <span class="arithmatex">\(rH\)</span> 上；但是伪造正确的 <span class="arithmatex">\(r'H\)</span> 需要事先得知 <span class="arithmatex">\(c\)</span>，<span>Fiat-shamir<span class="heti-spacing"> </span></span>变换保证了这是难以做到的。</p>
+<p>离散对数相等证明可用于为环签名提供可链接性，实现可验证随机函数（VRF）等。</p>
+<h4 id="_15">环签名<a class="headerlink" href="#_15" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>这里介绍一种被叫做自发匿名组（SAG）签名的环签名，可见，环签名是你自行选择和任意<span class="heti-skip"><span class="heti-spacing"> </span>n-1<span class="heti-spacing"> </span></span>个其他公钥组成一个组，进行签名，而验证者只能确认你是组中的一员而不知道你具体是用哪个公钥对应的私钥签名。</p>
+<p>这通常用于用户需要证明自己满足某个性质时，找到其他若干个同样满足性质的身份的公钥进行环签名，从而使得用户证明自己拥有某个性质的同时不泄露自己的具体身份。</p>
+<p>发送的是 <span class="arithmatex">\((s,c)\)</span> 版本的<span class="heti-skip"><span class="heti-spacing"> </span>Schnorr<span class="heti-spacing"> </span></span>签名的验证可表述为计算 <span class="arithmatex">\(c'=H(sG-cxG,m,xG)\)</span> 验证 <span class="arithmatex">\(c'=c\)</span>。</p>
+<p>这里有一个先得知的 <span class="arithmatex">\(c\)</span> 和基于此算出来的 <span class="arithmatex">\(c'\)</span> 他们“神奇”地相等了，又或者说，<span class="arithmatex">\(c\)</span> 是个大小为 <span class="arithmatex">\(1\)</span> 的“环”。</p>
+<p>我们记第 <span class="arithmatex">\(i\)</span> 个组员（环成员）的公钥为 <span class="arithmatex">\(x_iG\)</span>。</p>
+<p>让我们扩充这个环，使得验证过程变为 <span class="arithmatex">\(\forall i,c_{i+1}=H(s_{i}G-c_ix_iG,m,x_iG);c_{n+1}=c_1\)</span>。</p>
+<p>那么如何进行签名呢？</p>
+<p>首先我们要选择自己混入的是第 <span class="arithmatex">\(\pi\)</span> 个组员（不然也就没有匿名性了）。</p>
+<p>然后随机生成<span><span class="heti-spacing"> </span>r</span>，计算 <span class="arithmatex">\(c_{\pi+1}=H(rG,m,x_{\pi}G)\)</span>。</p>
+<p>然后依次计算 <span class="arithmatex">\(c_{\pi+1},\ldots,c_{n+1}=c_{1},\ldots,c_{\pi}\)</span> 为 <span class="arithmatex">\(c_{i+1}=H(s_{i}G-c_ix_iG,m,x_iG)\)</span>，其中 <span class="arithmatex">\(s_i\)</span> 为任选随机数。</p>
+<p>令 <span class="arithmatex">\(s_{\pi}=r+cx_{\pi}\)</span>，然后发送签名 <span class="arithmatex">\(c_1,s_1,\ldots,s_n\)</span>。</p>
+<p>由此，在验证者看来，<span class="arithmatex">\(c_1,s_i\)</span> 均为随机值，没法分辨你是谁（或者说，得出签名时的变量 <span class="arithmatex">\(\pi\)</span>）了。</p>
+<p>事实上，这样的环签名具有完全匿名性，也就是即使离散对数难题被攻破了，验证者造出量子计算机了，乃至非确定图灵机了，验证者仍然不知道是谁签的名。</p>
+<h2 id="_16">任意群上离散对数求解简介<a class="headerlink" href="#_16" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h2>
+<blockquote>
+<p>本节不限于椭圆曲线群，而可以扩展到任意群。
+</p>
+</blockquote>
+<p>本节和下节默认的问题是已知 <span class="arithmatex">\(A,kA\)</span> 求 <span class="arithmatex">\(k\)</span>。</p>
+<p>先来复习两个基础课的算法：</p>
+<h3 id="bsgs-algorithm">BSGS algorithm<a class="headerlink" href="#bsgs-algorithm" title="Permanent link">¶</a></h3>
+<p><span>Baby-Step Giant-Step<span class="heti-spacing"> </span></span>是每个<span class="heti-skip"><span class="heti-spacing"> </span>OIer<span class="heti-spacing"> </span></span>都耳熟能详的算法，对于阶为<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>的群，它可确定地在 <span class="arithmatex">\(O(\sqrt{n})\)</span> 的时间内求出任一离散对数问题，同时消耗 <span class="arithmatex">\(O(\sqrt{n})\)</span> 的空间<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（与之相比，暴力枚举对数<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>耗时<span><span class="heti-spacing"> </span>O(n)</span>）</p>
+<p>下面记 <span class="arithmatex">\(d=\lfloor \sqrt{n}\rfloor\)</span>。</p>
+<p>首先，<span class="arithmatex">\(\forall x\in[0,d]\)</span> 计算<span class="heti-skip"><span class="heti-spacing"> </span>xA<span class="heti-spacing"> </span></span>并存入哈希表<span class="heti-skip"><span class="heti-spacing"> </span>T<span class="heti-spacing"> </span></span>中<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（Baby-Step）</p>
+<p>枚举 <span class="arithmatex">\(i\in [0,\lfloor\frac{n}{d}\rfloor]\)</span>，计算 <span class="arithmatex">\(kA-idA\)</span> 并在<span class="heti-skip"><span class="heti-spacing"> </span>T<span class="heti-spacing"> </span></span>中查找，如找到离散对数<span><span class="heti-spacing"> </span>x</span>，则 <span class="arithmatex">\(k=id+x\)</span><heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（Giant-Step）</p>
+<h3 id="pohlig-hellman-algorithm">Pohlig-hellman algorithm（光滑曲线上的攻击）<a class="headerlink" href="#pohlig-hellman-algorithm" title="Permanent link">¶</a></h3>
+<p>我们一直在强调，群的阶必须要有大素数，如果没有，会发生什么（这样的曲线被称作光滑曲线）？</p>
+<p>令曲线的阶的唯一质因数分解如下 <span class="arithmatex">\(n=\prod p_i^{e_i}\)</span>。</p>
+<p>那么，如果我们可以求得 <span class="arithmatex">\(\{x_i\}\)</span> 使得 <span class="arithmatex">\(x_i\equiv n\pmod {p_i^{e_i}}\)</span> 那么，我们总是可以通过中国剩余定理恢复<span><span class="heti-spacing"> </span>n</span>。</p>
+<p>接下来，我们先来考虑求得 <span class="arithmatex">\(x\equiv n\pmod {p_i}\)</span>：</p>
+<p>令 <span class="arithmatex">\(A'=\frac{n}{p_i}A,(kA)'={\frac{n}{p_i}(kA)}\)</span>，显然有 <span class="arithmatex">\(k A'=(kA)'\)</span>，但是，由 <span class="arithmatex">\(A'\)</span> 生成的子群的大小至多只有 <span class="arithmatex">\(p_i\)</span>（如果<span class="heti-skip"><span class="heti-spacing"> </span>A<span class="heti-spacing"> </span></span>生成子群的大小为<span><span class="heti-spacing"> </span>n</span>，即 <span class="arithmatex">\(nA=\infin\)</span>，那么 <span class="arithmatex">\(p_iA'=\infin\)</span> ）。</p>
+<p>那么套用前面的算法，我们只需要 <span class="arithmatex">\(O(\sqrt{p_i})\)</span> 的时间求解离散对数。</p>
+<p>进一步地，令 <span class="arithmatex">\(x'\equiv n\pmod{p_i^2}\)</span>，那么 <span class="arithmatex">\(x'=k’p_i+x\)</span>，我们只需要求得 <span class="arithmatex">\(k'\in[0,p_i)\)</span> 即可。</p>
+<p>类似的，我们求 <span class="arithmatex">\({\frac{n}{p_i^2}(kA-xA)}\)</span> 相对 <span class="arithmatex">\(A'\)</span>  的离散对数即可，也只需要 <span class="arithmatex">\(O(\sqrt{p_i})\)</span> 的时间。</p>
+<p>同理，我们可以求出 <span class="arithmatex">\(x_i\equiv n\pmod{p_i^{e_i}}\)</span>。</p>
+<p>也就是说，我们只花费了 <span class="arithmatex">\(O(\sum e_i\sqrt{p_i})\)</span> 的时间求出了离散对数，当<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>中没有大质因子时，这将是致命的。</p>
+<h3 id="pollards-rho-algorithm"><strong>Pollard’s <span class="arithmatex">\(\rho\)</span> algorithm</strong><a class="headerlink" href="#pollards-rho-algorithm" title="Permanent link">¶</a></h3>
+<p>Pollard’<span>s<span class="heti-spacing"> </span></span><span class="arithmatex">\(\rho\)</span><span>algorithm<span class="heti-spacing"> </span></span>算法能在 <span class="arithmatex">\(O(\sqrt{n})\)</span> 内消耗<span class="heti-skip"><span class="heti-spacing"> </span>O(1)<span class="heti-spacing"> </span></span>的空间算出离散对数<span><span class="heti-spacing"> </span>k</span>。</p>
+<p>其大概原理为生成伪随机序列 <span class="arithmatex">\(a_iA+b_ikA\)</span>，当存在两个元素相等时（根据生日攻击，此时元素个数约为 <span class="arithmatex">\(\sqrt{n}\)</span>），有：</p>
+<div class="arithmatex">\[
+a_iA+b_ikA=a_jA+b_jkA\\
+a_i+b_ik=a_j+b_jk\\
+k=\frac{a_i-a_j}{b_j-b_i}
+\]</div>
+<p>同时，这也意味着伪随机序列存在着大小为<span class="heti-skip"><span class="heti-spacing"> </span>j-i<span class="heti-spacing"> </span></span>的循环节。</p>
+<p>如果令伪随机序列的下个元素由上个元素确定<span class="heti-skip"><span class="heti-spacing"> </span>(<span class="heti-spacing"> </span></span>即<span class="arithmatex">\(x_{i+1}=f(x_i)\)</span><span><span class="heti-spacing"> </span>)</span>，那么由<span class="heti-skip"><span class="heti-spacing"> </span>Floyd<span class="heti-spacing"> </span></span>的找循环节算法可以在<span class="heti-skip"><span class="heti-spacing"> </span>O(1)<span class="heti-spacing"> </span></span>的空间内找到循环节：</p>
+<p>维护两个值<span><span class="heti-spacing"> </span>c,d</span>，每一步令 <span class="arithmatex">\(c\leftarrow f(c),d\leftarrow f(f(d))\)</span>，则第<span class="heti-skip"><span class="heti-spacing"> </span>i<span class="heti-spacing"> </span></span>步时 <span class="arithmatex">\(c=x_i,d=x_{2i}\)</span>，当<span class="heti-skip"><span class="heti-spacing"> </span>c=d<span class="heti-spacing"> </span></span>时，有循环节大小为<span><span class="heti-spacing"> </span>i</span>。</p>
+<h3 id="pollards-kangaroolambda-algorithm"><strong>Pollard’s Kangaroo(Lambda) algorithm</strong><a class="headerlink" href="#pollards-kangaroolambda-algorithm" title="Permanent link">¶</a></h3>
+<p>推广上面的算法，我们可以得到<span><span class="heti-spacing"> </span>Pollard</span>’<span>s Kangaroo(lambda)<span class="heti-spacing"> </span></span>算法，它能在 <span class="arithmatex">\(O(\sqrt{r-l})\)</span> 内消耗<span class="heti-skip"><span class="heti-spacing"> </span>O(1)<span class="heti-spacing"> </span></span>的空间算出已知 <span class="arithmatex">\(k\in [l,r)\)</span> 的离散对数<span><span class="heti-spacing"> </span>k</span>。</p>
+<p>直接在<span class="heti-skip"><span class="heti-spacing"> </span>Sage<span class="heti-spacing"> </span></span>调用 <code>discrete_log_lambda(kA, A, (lbound, rbound),operation='+')</code> 即可求解（由于椭圆曲线群在<span class="heti-skip"><span class="heti-spacing"> </span>Sage<span class="heti-spacing"> </span></span>中是加法群，因此需要最后一个参数，否则默认尝试乘法群）</p>
+<p>具体原理参考：<a href="https://en.wikipedia.org/wiki/Pollard%27s_kangaroo_algorithm">https://en.wikipedia.org/wiki/Pollard%27s_kangaroo_algorithm</a></p>
+<h2 id="_17">椭圆曲线上离散对数求解简介<a class="headerlink" href="#_17" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h2>
+<h3 id="_18">奇异曲线及其攻击<a class="headerlink" href="#_18" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>我们在本章开头强调，<span class="arithmatex">\(x^3+ax^2+bx+c=0\)</span> 需有<span class="heti-skip"><span class="heti-spacing"> </span>3<span class="heti-spacing"> </span></span>个不同解，但如果它有解相同，会发生什么？</p>
+<p>曲线 <span class="arithmatex">\(y^2 = (x-\alpha)^3\)</span>  被称作<span><span class="heti-spacing"> </span>cusp</span>，而曲线 <span class="arithmatex">\(y^2 = (x-\alpha)^2(x-\beta)\)</span> 被称作<span><span class="heti-spacing"> </span>node</span>，他们的点 <span class="arithmatex">\((\alpha, 0)\)</span> 被称作奇异点<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（两种曲线均为奇异曲线）</p>
+<p>对于<span><span class="heti-spacing"> </span>node</span>，存在如下同构映射，将一个椭圆曲线上的点映射到<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>的乘法群中。</p>
+<div class="arithmatex">\[
+\begin{array}{rrcl}
+\varphi : &amp; E(GF(p))     &amp; \longrightarrow &amp; GF(p)^{\times}, \\
+          &amp; (x,y) &amp; \longmapsto     &amp; \frac{y + \sqrt{\alpha-\beta}(x-\alpha)}{y - \sqrt{\alpha-\beta}(x-\alpha)}.
+\end{array}
+\]</div>
+<p>接下来，问题等价于在<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>的乘法群上的离散对数。</p>
+<p>对于<span><span class="heti-spacing"> </span>cusp</span>，有将一个椭圆曲线上的点映射到<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>的加法群中的同构映射：</p>
+<div class="arithmatex">\[
+\begin{array}{rrcl}
+\varphi : &amp; E(GF(p))     &amp; \longrightarrow &amp; GF(p)^{+}, \\
+          &amp; (x,y) &amp; \longmapsto     &amp; \frac{y}{x-\alpha}.
+\end{array}
+\]</div>
+<p>这显然没有任何安全性可言。</p>
+<h3 id="smart-attack">异常曲线攻击（SMART attack）<a class="headerlink" href="#smart-attack" title="Permanent link">¶</a></h3>
+<p>当<span class="heti-skip"><span class="heti-spacing"> </span>n=p<span class="heti-spacing"> </span></span>时，我们可以构造如下的同构映射，使得曲线加法被映射到<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>上的加法：</p>
+<p>首先我们扩展点的加法，点和<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>上的数字 <span class="arithmatex">\(\alpha\)</span> 关联起来，记作 <span class="arithmatex">\([P,\alpha]\)</span>，此时点的加法定义为</p>
+<div class="arithmatex">\[
+[P, \alpha] \oplus [Q, \beta] = [ P + Q, \alpha + \beta + slope(P,Q)]
+\]</div>
+<p><span class="arithmatex">\(slope(P,Q)\)</span> 返回两点所在直线的斜率（<span>P=Q<span class="heti-spacing"> </span></span>时是点在椭圆曲线上切线的斜率）。</p>
+<p>接下来计算 <span class="arithmatex">\(n[P,0]=[\infin,\beta]\)</span>，令 <span class="arithmatex">\(\varphi(P) = \beta\)</span> 作为这个同构映射。</p>
+<h3 id="_19">无效曲线攻击<a class="headerlink" href="#_19" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>当曲线上的点由其他人提供时，我们必须要判断点是否在曲线上，而如果点并不在曲线上，当我们就当无事发生地进行点的数乘运算，我们实际上在算什么东西？</p>
+<p>事实上，<span>Weierstrass<span class="heti-spacing"> </span></span>形式曲线的加法，并没有任何运算有 <span class="arithmatex">\(c\)</span> 的参与。将你的点 <span class="arithmatex">\((x',y')\)</span> 带入曲线方程解出 <span class="arithmatex">\(c'\)</span>，你实际上就在以 <span class="arithmatex">\((a,b,c')\)</span>为参数的曲线上运算，而这样的曲线不是被精心设计的，因此很容易是光滑曲线。</p>
+<h3 id="_20">降级曲线攻击<a class="headerlink" href="#_20" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>而对于另一种实现中常见的曲线形式——<span>Edwards<span class="heti-spacing"> </span></span>曲线，如果不校验点，那么其他人可以输入 <span class="arithmatex">\((0,y)\)</span>，此时点的乘法满足：</p>
+<p><span class="arithmatex">\(n(0,y)=(0,y^n)\)</span>，换言之，离散对数问题来到了<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>上。</p>
+<h3 id="_21">实数域曲线离散对数的计算<a class="headerlink" href="#_21" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>我们通常在<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>上实现椭圆曲线，但是，在实数域上实现椭圆曲线的问题是什么？</p>
+<p>对于实数域乘法群的“离散“对数，大家都知道可以通过放缩和泰勒展开来计算，但实数域上的椭圆曲线的问题则没有这么广为人知，甚至在网上能够找到声称通过把椭圆曲线的运算扩展到实数域的三流论文。而事实上对于曲线 <span class="arithmatex">\(y^2=x^3+ax+b\)</span>，我们有：</p>
+<div class="arithmatex">\[
+\begin{array}{rrcl}
+\varphi : &amp; E(R)     &amp; \longrightarrow &amp; R/Z^{+}, \\
+          &amp; (x,y) &amp; \longmapsto     &amp; \left\{ \begin{array}{rrcl}\frac{\int_{x}^{+\infin}\frac{dx}{\sqrt{x^3+ax+b}}}{2\int_{\gamma}^{+\infin}\frac{dx}{\sqrt{x^3+ax+b}}} \pmod 1, &amp;y&gt;0\\ 
+1-\frac{\int_{x}^{+\infin}\frac{dx}{\sqrt{x^3+ax+b}}}{2\int_{\gamma}^{+\infin}\frac{dx}{\sqrt{x^3+ax+b}}} \pmod 1, &amp;y&lt;0
+\end{array} \right.
+\end{array}
+\]</div>
+<p>这里 <span class="arithmatex">\(\gamma\)</span> 为方程 <span class="arithmatex">\(x^3+ax+b=0\)</span> 的最大实数解；<span class="arithmatex">\(R/Z\)</span><span>(<span class="heti-spacing"> </span></span>圆群<span class="heti-skip"><span class="heti-spacing"> </span>)<span class="heti-spacing"> </span></span>上的运算可以视为 <span class="arithmatex">\([0,1)\)</span> 上的整数进行加法运算（运算结果只取小数部分，即<span class="arithmatex">\(\pmod 1\)</span>）。</p>
+<p>几何解释：</p>
+<p>椭圆曲线的两翼趋向的无穷远点是同一个点，因此将两翼连接就近似于一个圆。</p>
+<p>一种基于<span class="heti-skip"><span class="heti-spacing"> </span>double<span class="heti-spacing"> </span></span>的同态构造方法是<heti-adjacent class="heti-adjacent-half">：</heti-adjacent>（把圆内角是<span class="heti-skip"><span class="heti-spacing"> </span>0~360°<span class="heti-spacing"> </span></span>看作<span><span class="heti-spacing"> </span>0~1</span>，而<span class="heti-skip"><span class="heti-spacing"> </span>y&gt;0<span class="heti-spacing"> </span></span>则在前<span><span class="heti-spacing"> </span>0.5</span>，否则在后<span><span class="heti-spacing"> </span>0.5</span>，然后<span class="heti-skip"><span class="heti-spacing"> </span>double<span class="heti-spacing"> </span></span>后看<span class="heti-skip"><span class="heti-spacing"> </span>y<span class="heti-spacing"> </span></span>的符号即可确认下一位是在那个<span class="heti-skip"><span class="heti-spacing"> </span>0.5<span class="heti-spacing"> </span></span>里的哪一半，以此类推）。</p>
+<p>而积分方法在几何上是把 <span class="arithmatex">\(y\)</span> 坐标取反后统计面积占比。</p>
+<p>圆群上的离散对数可以通过格基规约求解，例如小数精度为<span class="heti-skip"><span class="heti-spacing"> </span>50<span class="heti-spacing"> </span></span>位时，问题<span class="heti-skip"><span class="heti-spacing"> </span>nA=B<span class="heti-spacing"> </span></span>的离散对数<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>即格基 <span class="arithmatex">\([(10^{50},0),(\lfloor 10^{50}A\rfloor,1)]\)</span> 与向量 <span class="arithmatex">\((\lfloor 10^{50}B\rfloor,0)\)</span> 的<span class="heti-skip"><span class="heti-spacing"> </span>CVP<span class="heti-spacing"> </span></span>的第二个值的绝对值。</p>
+<h3 id="mov">低嵌入度数的曲线（<span>MOV<span class="heti-spacing"> </span></span>攻击）<a class="headerlink" href="#mov" title="Permanent link">¶</a></h3>
+<p>但嵌入度数<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>较小时，任取定义在 <span class="arithmatex">\(GF(p^k)\)</span> 上的椭圆曲线上的一点<span><span class="heti-spacing"> </span>Q</span>，计算 <span class="arithmatex">\(e(A,Q),e(kA,Q)\)</span>。</p>
+<p>而 <span class="arithmatex">\(e(A,Q)^k=e(kA,Q)\)</span> 因此问题转移（同构映射）到 <span class="arithmatex">\(GF(p^k)\)</span> 上，后者可以采用数域筛法（NFS）在相比在椭圆曲线上更容易地求出离散对数<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（可下载<span class="heti-skip"><span class="heti-spacing"> </span>cado-nfs<span class="heti-spacing"> </span></span>计算离散对数）</p>
+<p>由此也可以看到，椭圆曲线上的离散对数的困难性和同构映射计算的困难性有着莫大的关系。</p>
+<h3 id="_22">双线性配对带来的其他威胁<a class="headerlink" href="#_22" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>本文并不详细介绍关于椭圆曲线困难性相关的命题，除了椭圆曲线上的离散对数问题（ECDLP）外，还有<span><span class="heti-spacing"> </span>One more discrete logarithm problem</span>（OMDLP）等问题的困难性论证这些密码学的安全性，<span>ECDLP<span class="heti-spacing"> </span></span>如果可解，他们也一样可解，但反之并不亦然。</p>
+<p>例如，前述<span class="heti-skip"><span class="heti-spacing"> </span>Diffle-Hellman<span class="heti-spacing"> </span></span>密钥交换相关存在两个命题：</p>
+<p>ECCDHP，椭圆曲线上的<span class="heti-skip"><span class="heti-spacing"> </span>Diffle-Hellman<span class="heti-spacing"> </span></span>可计算性问题：即给定<span class="heti-skip"><span class="heti-spacing"> </span>xG,yG<span class="heti-spacing"> </span></span>求<span><span class="heti-spacing"> </span>xyG</span>。</p>
+<p>ECDDHP，椭圆曲线上的<span class="heti-skip"><span class="heti-spacing"> </span>Diffle-Hellman<span class="heti-spacing"> </span></span>可判定性问题：即给定<span class="heti-skip"><span class="heti-spacing"> </span>xG,yG<span class="heti-spacing"> </span></span>和<span><span class="heti-spacing"> </span>A</span>，请判断<span class="heti-skip"><span class="heti-spacing"> </span>A=xyG<span class="heti-spacing"> </span></span>是否成立。</p>
+<p>后者在嵌入度数为<span class="heti-skip"><span class="heti-spacing"> </span>1<span class="heti-spacing"> </span></span>的曲线上显然是易受威胁的，因为此时存在<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>的椭圆曲线上两个点映射到<span class="heti-skip"><span class="heti-spacing"> </span>GF(p)<span class="heti-spacing"> </span></span>上的双线性映射，而 <span class="arithmatex">\(e(xG,yG)=e(G,G)^{xy}=e(xyG,G)\)</span>，因此只要判断<span class="heti-skip"><span class="heti-spacing"> </span>e(A,G)=e(xG,yG)<span class="heti-spacing"> </span></span>是否成立就足以回答问题。</p>
+<p>此外，<span>Weil<span class="heti-spacing"> </span></span>配对满足<span class="heti-skip"><span class="heti-spacing"> </span>e(X,Y)=1<span class="heti-spacing"> </span></span>当且仅当存在 <span class="arithmatex">\(aX=bY,a,b\in \mathbb{Z}\)</span>，进而可以判断点是否在任一循环群上。</p>
+<h2 id="r">数字签名中与<span class="heti-skip"><span class="heti-spacing"> </span>r<span class="heti-spacing"> </span></span>相关的攻击简介<a class="headerlink" href="#r" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h2>
+<blockquote>
+<p>本节不限于椭圆曲线群和<span class="heti-skip"><span class="heti-spacing"> </span>Schnorr<span class="heti-spacing"> </span></span>签名，例如<span><span class="heti-spacing"> </span>DSA</span>、<span>ECDSA<span class="heti-spacing"> </span></span>算法也易受类似的攻击
+</p>
+</blockquote>
+<h3 id="r_1"><span>r<span class="heti-spacing"> </span></span>重用<a class="headerlink" href="#r_1" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>考虑签名中关键的线性式子 <span class="arithmatex">\(s=r+cx\)</span>。</p>
+<p>两次签名中使用了相同的<span><span class="heti-spacing"> </span>r</span>，意味着 <span class="arithmatex">\(s_1=r+c_1x,s_2=r+c_2x\pmod n\)</span>  而未知数只有<span class="heti-skip"><span class="heti-spacing"> </span>r,x<span class="heti-spacing"> </span></span>因此可以联立方程求解。</p>
+<h3 id="r_2"><span>r<span class="heti-spacing"> </span></span>线性相关<a class="headerlink" href="#r_2" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>考虑采用线性同余随机数生成器<span><span class="heti-spacing"> </span>LCG</span> （假设<span class="heti-skip"><span class="heti-spacing"> </span>d<span class="heti-spacing"> </span></span>已知）来产生随机数<span><span class="heti-spacing"> </span>r</span>，那么<span class="heti-skip"><span class="heti-spacing"> </span>l<span class="heti-spacing"> </span></span>次签名的<span class="heti-skip"><span class="heti-spacing"> </span>r<span class="heti-spacing"> </span></span>满足</p>
+<p><span class="arithmatex">\(r_{i+1}=ar_{i}+b\pmod d\)</span></p>
+<p>同时 <span class="arithmatex">\(s_i=r_i+c_ix\pmod n\)</span>。</p>
+<p>对于<span class="heti-skip"><span class="heti-spacing"> </span>l<span class="heti-spacing"> </span></span>次签名，我们可以列<span class="heti-skip"><span class="heti-spacing"> </span>2l-1<span class="heti-spacing"> </span></span>个等式，含有<span class="heti-skip"><span class="heti-spacing"> </span>3+l<span class="heti-spacing"> </span></span>个未知量，显然当<span class="heti-skip"><span class="heti-spacing"> </span>l<span class="heti-spacing"> </span></span>足够大时，我们就有机会解出所有方程。</p>
+<p>当然，需注意到这些模意义下的线性方程的模数不同。</p>
+<p>这时，我们可以祭出格基规约大法，对于第<span class="heti-skip"><span class="heti-spacing"> </span>i<span class="heti-spacing"> </span></span>个方程为 <span class="arithmatex">\(\sum_{j=1}^{m}a_{i,j}x_j=b_i\pmod {p_i}\)</span> 的<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>个方程的方程组，构造格基：</p>
+<div class="arithmatex">\[
+\begin{bmatrix}
+a_{1,1} &amp; \cdots &amp; a_{1,m} &amp; p_1 &amp;  &amp;   &amp; b_1 \\
+ \vdots &amp; \ddots &amp; \vdots  &amp;   &amp; \ddots &amp;   &amp; \vdots \\
+a_{n,1} &amp; \cdots &amp; a_{n,m} &amp;  &amp; &amp; p_n &amp; b_n \\
+1 &amp;  &amp;              &amp;  &amp;  &amp;  &amp;   \\
+  &amp; \ddots &amp;   &amp;   \\
+ &amp;  &amp; 1             &amp;  \\
+\end{bmatrix}
+\]</div>
+<p>根据 <span class="arithmatex">\(x_i\)</span> 可能的取值范围适当缩放此格基的每一列向量，其<span class="heti-skip"><span class="heti-spacing"> </span>CVP<span class="heti-spacing"> </span></span>即为前<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>格元素为<span><span class="heti-spacing"> </span>0</span>，后<span class="heti-skip"><span class="heti-spacing"> </span>m<span class="heti-spacing"> </span></span>个元素为 <span class="arithmatex">\(x_i\)</span>（乘上缩放系数）的向量。</p>
+<p>（其实建议直接调用求解不同模意义下的线性方程组的板子<span><span class="heti-spacing"> </span>solvelinmod.py</span>，见附件，为<span class="heti-skip"><span class="heti-spacing"> </span>github<span class="heti-spacing"> </span></span>公开内容）</p>
+<h3 id="r_3"><span>r<span class="heti-spacing"> </span></span>部分已知<a class="headerlink" href="#r_3" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>如果每次我都泄露<span class="heti-skip"><span class="heti-spacing"> </span>r<span class="heti-spacing"> </span></span>的一些比特呢（比如<span class="heti-skip"><span class="heti-spacing"> </span>r<span class="heti-spacing"> </span></span>虽然随机，但是随机的范围是<span><span class="heti-spacing"> </span>[0,x]</span>，而 <span class="arithmatex">\(x&lt;&lt;n\)</span> 导致前几位都是<span><span class="heti-spacing"> </span>0</span>）。</p>
+<p>那么，我们的 <span class="arithmatex">\(r=r_c+r_ss_c\)</span> 其中 <span class="arithmatex">\(r_c,s_c\)</span> 为常数，而 <span class="arithmatex">\(r_s\)</span> 非常小。</p>
+<p>考虑 <span class="arithmatex">\(s=r+cx\)</span>，我们的问题将会转换为如下的问题（Hidden number problem，HNP）：</p>
+<p>即求解第<span class="heti-skip"><span class="heti-spacing"> </span>i<span class="heti-spacing"> </span></span>个方程为 <span class="arithmatex">\(x_i-t_iy+a_i\equiv 0\pmod p\)</span> 的<span class="heti-skip"><span class="heti-spacing"> </span>m<span class="heti-spacing"> </span></span>个方程的方程组，其中 <span class="arithmatex">\(p,a_i,t_i\)</span> 已知，且 <span class="arithmatex">\(x_i\)</span> 非常小<span class="heti-skip"><span class="heti-spacing"> </span>(<span class="heti-spacing"> </span></span>小于<span><span class="heti-spacing"> </span>B)</span>。</p>
+<p>”非常小“要素察觉，快去西天请格基规约：</p>
+<div class="arithmatex">\[
+\begin{bmatrix}
+p \\
+&amp; p \\
+&amp; &amp; \ddots \\
+&amp; &amp; &amp; p \\
+t_1 &amp; t_2 &amp; \cdots &amp; t_m &amp; B/p \\
+a_1 &amp; a_2 &amp; \cdots &amp; a_m &amp; &amp; B
+\end{bmatrix}
+\]</div>
+<p>这里每行为一向量，其<span class="heti-skip"><span class="heti-spacing"> </span>CVP<span class="heti-spacing"> </span></span>为  <span class="arithmatex">\((-x_1,-x_2,..,-x_m,-By/p, B)\)</span>。</p>
+<p>可见，格基规约是求线性、解非常小的方程组的利器。</p>
+<h2 id="paillier"><span>Paillier<span class="heti-spacing"> </span></span>同态加密<a class="headerlink" href="#paillier" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h2>
+<h3 id="_23">基础<a class="headerlink" href="#_23" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<h4 id="_24">加法同态<a class="headerlink" href="#_24" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>对数的加法即幂次结果的乘法。令对数为密文，则有 <span class="arithmatex">\(g^{m_1}g^{m_2}=g^{m_1+m_2}\)</span><heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（原文<span><span class="heti-spacing"> </span>m</span>，密文 <span class="arithmatex">\(g^{m}\)</span>）</p>
+<p>现在的问题是，解密需要有人会做离散对数，而且要求恰好是私钥拥有者会做，其他人不会做。</p>
+<p>比如说，对于光滑合数阶群的离散对数问题，可以用<span><span class="heti-spacing"> </span>Pollard rho</span>、Pollard lambda、BSGS、<span>Pohlig Hellmen<span class="heti-spacing"> </span></span>解决，但是，毫无疑问地，问题变成了所有人都可以解决。</p>
+<h4 id="_25">解决特定情形的离散对数问题<a class="headerlink" href="#_25" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>一个将在模平方乘法群上的离散对数转为乘法的神奇技巧（仔细考虑<span class="arithmatex">\(\pmod{p^2}\)</span> 意味着什么即可得到） ：</p>
+<p><span>p<span class="heti-spacing"> </span></span>是素数。根据欧拉定理，<span class="arithmatex">\(\phi(p^2)=p(p-1),\phi(p)=p-1\)</span></p>
+<p>对于任意数<span><span class="heti-spacing"> </span>g</span>，<span class="arithmatex">\(g^{p-1}=1\pmod p\)</span>，换言之 <span class="arithmatex">\(g^{p-1}=kp+1\)</span>。</p>
+<p>对于所有整数成立的式子对于模任意数也成立，因此 <span class="arithmatex">\(g^{p-1}\equiv kp+1\pmod{p^2}\)</span></p>
+<p>而 <span class="arithmatex">\((kp+1)^m\equiv mkp+1\pmod{p^2}\)</span> 注意二项式定理，且更大的项都被<span class="arithmatex">\(p^2\)</span>模掉了。</p>
+<p>定义 <span class="arithmatex">\(L_p(x)=\frac{x-1}{p}\)</span>。请注意，<span class="arithmatex">\(L_p\)</span> 的输入是在<span class="arithmatex">\(\pmod{p^2}\)</span> 下的，而输出是在<span class="arithmatex">\(\pmod p\)</span> 下的。</p>
+<p>那么 <span class="arithmatex">\(L_p((kp+1)^m)=L_p(mkp+1)=mk\pmod p\)</span>。将式子左侧成<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>在模<span class="heti-skip"><span class="heti-spacing"> </span>p<span class="heti-spacing"> </span></span>下的逆元即可求出 <span class="arithmatex">\(m\pmod p\)</span>。</p>
+<h3 id="_26">扩展到合数情景<a class="headerlink" href="#_26" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>“二”解决了离散对数问题，但是没法做到“只有私钥拥有者会做”，为此，我们将其扩展为合数情景，从而引入私钥<span class="heti-skip"><span class="heti-spacing"> </span>(<span class="heti-spacing"> </span></span>大整数的分解<span><span class="heti-spacing"> </span>)</span>。</p>
+<p>根据<span><span class="heti-spacing"> </span>RSA</span>，我们知道知道<span class="heti-skip"><span class="heti-spacing"> </span>(p-1)(q-1)<span class="heti-spacing"> </span></span>和知道素数分解等价，前者可以作为秘密。</p>
+<p>n=pq，而<span class="heti-skip"><span class="heti-spacing"> </span>p,q<span class="heti-spacing"> </span></span>是素数。</p>
+<p>根据欧拉定理，<span class="arithmatex">\(\phi(n^2)=pq(p-1)(q-1),\phi(n)=(p-1)(q-1)\)</span>。</p>
+<p>现在我们求 <span class="arithmatex">\(\mathbb{Z}_{n^2}\)</span> 与 <span class="arithmatex">\(\mathbb{Z}_{n}\)</span> 群的最大生成子群的阶，根据<span class="heti-skip"><span class="heti-spacing"> </span>Carmichael<span class="heti-spacing"> </span></span>函数， <span class="arithmatex">\(\lambda(n)=lcm(p-1,q-1),\lambda(n^2)|pqlcm(p-1,q-1)=n\lambda(n)\)</span>（伏笔）<heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（显然，知道<span class="heti-skip"><span class="heti-spacing"> </span>\lambda(n)<span class="heti-spacing"> </span></span>或知道<span class="heti-skip"><span class="heti-spacing"> </span>\phi(n)<span class="heti-spacing"> </span></span>可以转换，前者可以作为秘密）</p>
+<p>对于任意数<span><span class="heti-spacing"> </span>g</span>，<span class="arithmatex">\(g^{\lambda(n)}=1\pmod n\)</span>，换言之 <span class="arithmatex">\(g^{\lambda(n)}=kn+1\)</span>。</p>
+<p>同上面的理 <span class="arithmatex">\(g^{\lambda(n)}\equiv kn+1\pmod{n^2}\)</span></p>
+<p>而同样根据二项式定理，有 <span class="arithmatex">\((kn+1)^m\equiv mkn+1\pmod{n^2}\)</span> 。</p>
+<p><span class="arithmatex">\(L_n((kn+1)^m)=L_n(mkn+1)=mk\pmod n\)</span>。将式子左侧乘<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>在模<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>下的逆元 <span class="arithmatex">\(\mu\)</span> 即可求出 <span class="arithmatex">\(m\pmod n\)</span>。</p>
+<h3 id="_27">交换运算次序<a class="headerlink" href="#_27" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>上面的过程是首先有<span><span class="heti-spacing"> </span>g</span>，第一步得到 <span class="arithmatex">\(g^{\lambda(n)}\)</span>，第二步得到 <span class="arithmatex">\(g^{\lambda(n)m}\)</span> ，第三步反解得到<span><span class="heti-spacing"> </span>m</span>。</p>
+<p>毫无疑问，加密操作是引入<span class="heti-skip"><span class="heti-spacing"> </span>m<span class="heti-spacing"> </span></span>的时候发生的，但问题是第三步不需要用到秘密，而第一步却用到了秘密。</p>
+<p>为了解决这个问题，我们根据幂运算的性质来交换运算次序：</p>
+<p>首先有<span><span class="heti-spacing"> </span>g</span>，第一步得到 <span class="arithmatex">\(g^{m}\)</span>，第二步得到 <span class="arithmatex">\(g^{\lambda(n)m}\)</span> ，第三步反解得到<span><span class="heti-spacing"> </span>m</span>。</p>
+<p>这样就够成了密码协议（协议中的计算 <span class="arithmatex">\(d=f(a,b,c)=\ldots=g(a,b,c)\)</span> ，表示算法中的步骤为 <span class="arithmatex">\(d\coloneqq f(a,b,c)\)</span>，而 <span class="arithmatex">\(\ldots\)</span> 是对<span class="heti-skip"><span class="heti-spacing"> </span>f(a,b,c)<span class="heti-spacing"> </span></span>的数学推导，其结果等于<span><span class="heti-spacing"> </span>g(a,b,c)</span>）：</p>
+<h4 id="_28">密钥生成<a class="headerlink" href="#_28" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p><span>Miller-Rabin<span class="heti-spacing"> </span></span>得到大素数<span><span class="heti-spacing"> </span>p,q</span>，计算 <span class="arithmatex">\(n=pq,\lambda(n)=lcm(p-1,q-1)\)</span>。</p>
+<p>随机生成<span><span class="heti-spacing"> </span>g</span>，算出 <span class="arithmatex">\(k=L_n(g^{\lambda(n)})=L_n(kn+1)\)</span>，求<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>在模<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>下的逆元 <span class="arithmatex">\(\mu\)</span>，如果逆元不存在，重新生成<span><span class="heti-spacing"> </span>g</span><heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（可见，不存在的概率极小）</p>
+<p>公钥<span><span class="heti-spacing"> </span>g,n</span> （加密所需）。私钥 <span class="arithmatex">\(\lambda(n),\mu\)</span> （解密所需，其中 <span class="arithmatex">\(\lambda(n)\)</span> 是难以求出的秘密本身）</p>
+<h4 id="_29">加密<a class="headerlink" href="#_29" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>消息为 <span class="arithmatex">\(m\pmod n\)</span>，密文 <span class="arithmatex">\(c\equiv g^m\pmod{n^2}\)</span>。</p>
+<h4 id="_30">解密<a class="headerlink" href="#_30" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>首先，计算 <span class="arithmatex">\(h=L_n(c^{\lambda(n)})=L_n({(g^{\lambda(n)})^{m}})=L_n((kn+1)^m)=L_n(mkn+1)=mk\)</span>。</p>
+<p>解密得到 <span class="arithmatex">\(m=h\mu=hk^{-1}\pmod n\)</span>。</p>
+<p>简言之，<span class="arithmatex">\(m=L_n(c^{\lambda(n)}\pmod{n^2})\mu\pmod n\)</span>。</p>
+<h4 id="_31">同态加法<a class="headerlink" href="#_31" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>消息的加法 <span class="arithmatex">\(m_1+m_2 =&gt; c_1c_2=g^{m_1+m_2}\pmod{n^2}\)</span>。</p>
+<h3 id="_32">随机扰动<a class="headerlink" href="#_32" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h3>
+<p>现在的问题是，有意义的值很可能很小，比如<span><span class="heti-spacing"> </span>1,2,3</span>。攻击者只要依次加密他们并把结果与某个有意义的值的密文比较，就可以得到这个值是多少。换言之，离散对数极小时，离散对数问题的困难性不存在。</p>
+<p>一个想法是，密文引入“完美的”随机扰动<span><span class="heti-spacing"> </span>t</span>，使得 <span class="arithmatex">\(c'\equiv g^mt\pmod{n^2}\)</span>。</p>
+<p>随机扰动足够的多，导致没法爆破。</p>
+<p>但是同时又不影响解密，即 <span class="arithmatex">\(m=L_n({c'}^{\lambda(n)}\pmod{n^2})\mu\pmod n\)</span> 仍然成立。</p>
+<p>即，要使得 <span class="arithmatex">\(c^{\lambda(n)}=g^{m\lambda(n)}\pmod{n^2}\)</span> 与 <span class="arithmatex">\({c’}^{\lambda(n)}=g^{m\lambda(n)}t^{\lambda(n)}\pmod{n^2}\)</span> 相等。</p>
+<p>即，要使得 <span class="arithmatex">\(t^{\lambda(n)}=1\pmod{n^2}\)</span>。</p>
+<p>而我们有，对于任意群元素<span><span class="heti-spacing"> </span>x</span>，<span class="arithmatex">\(x^{\lambda(n^2)}\equiv 1\pmod{n^2}\)</span>。</p>
+<p>伏笔回收，<span class="arithmatex">\(x^{n\lambda(n)}\equiv 1\pmod{n^2}\)</span>。也就是说 <span class="arithmatex">\({(x^n)}^{\lambda(n)}\equiv 1\pmod{n^2}\)</span>。</p>
+<p>换言之取随机数<span><span class="heti-spacing"> </span>r</span>，<span class="arithmatex">\(r^n\)</span> 就是一个“完美的”随机扰动，而且得到这样的一个扰动不需要私钥信息。</p>
+<p>回顾一遍整个协议：</p>
+<h4 id="_33">密钥生成（不变）<a class="headerlink" href="#_33" title="Permanent link">¶</a></h4>
+<p><span>Miller-Rabin<span class="heti-spacing"> </span></span>得到大素数<span><span class="heti-spacing"> </span>p,q</span>，计算 <span class="arithmatex">\(n=pq,\lambda(n)=lcm(p-1,q-1)\)</span>。</p>
+<p>随机生成<span><span class="heti-spacing"> </span>g</span>，算出 <span class="arithmatex">\(k=L_n(g^{\lambda(n)})=L_n(kn+1)\)</span>，求<span class="heti-skip"><span class="heti-spacing"> </span>k<span class="heti-spacing"> </span></span>在模<span class="heti-skip"><span class="heti-spacing"> </span>n<span class="heti-spacing"> </span></span>下的逆元 <span class="arithmatex">\(\mu\)</span>，如果逆元不存在，重新生成<span><span class="heti-spacing"> </span>g</span><heti-adjacent class="heti-adjacent-half">。</heti-adjacent>（可见，不存在的概率极小）</p>
+<p>公钥<span><span class="heti-spacing"> </span>g,n</span> （加密所需）。私钥 <span class="arithmatex">\(\lambda(n),\mu\)</span> （解密所需，其中 <span class="arithmatex">\(\lambda(n)\)</span> 是难以求出的秘密本身）</p>
+<h4 id="_34">加密<a class="headerlink" href="#_34" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>消息为 <span class="arithmatex">\(m\pmod n\)</span>，随机选取 <span class="arithmatex">\(r\in[2,n-1]\)</span>，计算得到密文 <span class="arithmatex">\(c\equiv g^mr^n\pmod{n^2}\)</span>。</p>
+<h4 id="_35">解密（不变）<a class="headerlink" href="#_35" title="Permanent link">¶</a></h4>
+<p>首先，计算 <span class="arithmatex">\(h=L_n(c^{\lambda(n)})=L_n({(g^{\lambda(n)})^{m}})=L_n((kn+1)^m)=L_n(mkn+1)=mk\)</span>。</p>
+<p>解密得到 <span class="arithmatex">\(m=h\mu=hk^{-1}\pmod n\)</span>。</p>
+<p>简言之，<span class="arithmatex">\(m=L_n(c^{\lambda(n)}\pmod{n^2})\mu\pmod n\)</span>。</p>
+<h4 id="_36">同态加法<a class="headerlink" href="#_36" title="Permanent link"><span><span class="heti-spacing"> </span>¶</span></a></h4>
+<p>消息的加法 <span class="arithmatex">\(m_1+m_2 =&gt; c_1c_2=g^{m_1+m_2}(r_1r_2)^n\pmod{n^2}\)</span>。</p>
+</article>
+</div>
+</div>
+<button class="md-top md-icon" data-md-component="top" hidden="" type="button">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"></path></svg>
+            Back to top
+          </button>
+</main>
+<footer class="md-footer">
+<nav aria-label="Footer" class="md-footer__inner md-grid">
+<a aria-label="Previous: crypto lab 2: AES, RSA &amp; LWE" class="md-footer__link md-footer__link--prev" href="../crypto-lab2/" rel="prev">
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"></path></svg>
+</div>
+<div class="md-footer__title">
+<span class="md-footer__direction">
+                Previous
+              </span>
+<div class="md-ellipsis">
+                crypto lab 2: AES, RSA &amp; LWE
+              </div>
+</div>
+</a>
+<a aria-label="Next: web lab 2: PHP/SQL Basics" class="md-footer__link md-footer__link--next" href="../web-lab2/" rel="next">
+<div class="md-footer__title">
+<span class="md-footer__direction">
+                Next
+              </span>
+<div class="md-ellipsis">
+                web lab 2: PHP/SQL Basics
+              </div>
+</div>
+<div class="md-footer__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"></path></svg>
+</div>
+</a>
+</nav>
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+<div class="md-copyright__highlight">
+      Copyright © 2023 ZJU AAA
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"base": "../..", "features": ["content.code.annotate", "content.action.edit", "navigation.tracking", "navigation.tabs", "navigation.top", "navigation.footer", "navigation.sections"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+<script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
+<script src="https://cdn.tonycrane.cc/utils/katex.min.js"></script>
+<script src="../../js/katex.js"></script>
+</body>
+</html>
